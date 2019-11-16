@@ -92,6 +92,7 @@ save
   !       
   ! bonds number of each bonds
   integer, allocatable, dimension(:)   :: bond_numb 
+  integer, allocatable, dimension(:)   :: bond_numb0
   !  
   ! status of occupation of lattice vertexes  
   integer(kind=1), allocatable, dimension(:,:,:):: latt 

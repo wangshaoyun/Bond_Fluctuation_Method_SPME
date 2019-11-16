@@ -1,4 +1,4 @@
-1               ! pH_or_not
+0               ! pH_or_not
 300             ! Lz2
 2               ! Z_empty
 5D-3            ! sigmag
@@ -14,7 +14,7 @@
 1000000         ! StepNum0
 2000000         ! StepNum:  steps of running
 20              ! DeltaStep: interval of pH move
-1000             ! DeltaStep1: height
+1000            ! DeltaStep1: height
 200             ! DeltaStep2: histogram
-1000            ! DeltaStep3: write data
+1000             ! DeltaStep3: write data
 0               ! pH-pKa

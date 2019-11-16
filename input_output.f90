@@ -582,6 +582,7 @@ subroutine continue_read_data(l)
 
   pos0 = pos
   latt0 =latt
+  bond_numb0 = bond_numb
 
 end subroutine continue_read_data
 

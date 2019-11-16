@@ -24,6 +24,7 @@ subroutine initialize_position
 
   pos0 = pos
   latt0 = latt
+  bond_numb0 = bond_numb
 
 end subroutine initialize_position
 
@@ -241,6 +242,8 @@ subroutine error_analysis(n, EE)
     call total_energy_spme(EE)
   end if
 
+!   write(*,*) 'initial energy',EE
+
 end subroutine error_analysis
 
 
@@ -269,6 +272,9 @@ subroutine monte_carlo_move( EE, DeltaE )
         call new_position(EE,DeltaE)
         num_move = num_move + 1
       end if
+!       if ( mod(i, multistep) == 0 ) then
+!         call update_multistep(EE, EE2)
+!       end if
     end do
   call cpu_time(fn)
 
@@ -282,17 +288,16 @@ subroutine update_multistep(EE,EE2)
   real*8 :: rnd, DeltaE
   real*8, intent(inout) :: EE
   real*8, intent(inout) :: EE2
-  real*8 :: EE1
   
   call compute_Nq_net
 
   call SPME_Ewald(energy_long1)
 
+!   call Ewald_long(energy_long1)
+
   call random_number(rnd)
 
   DeltaE = energy_long1 - energy_long0
-  EE1 = energy_long0
-  energy_long0 = energy_long1
   EE = EE + DeltaE
   num_long = num_long + 1
   total_accept = total_accept + accept
@@ -303,10 +308,11 @@ subroutine update_multistep(EE,EE2)
     if (rnd>exp(-beta*DeltaE)) then
       pos = pos0
       latt = latt0
+      bond_numb = bond_numb0
+      EE = EE2
+      energy_long1 = energy_long0
       call compute_Nq_net
       call initialize_energy_arrays_ewald
-      energy_long0 = EE1
-      EE = EE2
       total_accept = total_accept - accept
       total_accept_pH = total_accept_pH - accept_pH
       total_accept_long = total_accept_long - 1
@@ -314,7 +320,9 @@ subroutine update_multistep(EE,EE2)
   end if
   pos0 = pos
   latt0 = latt
+  bond_numb0 = bond_numb
   EE2 = EE
+  energy_long0 = energy_long1
   accept = 0
   accept_pH = 0
   accept_ratio = 1.*total_accept / num_move
@@ -565,7 +573,7 @@ subroutine new_position(EE, DeltaE)
           latt(ix,yp1,iz)   = 0 
           latt(ix,iy,zp1)   = 0 
           latt(ix,yp1,zp1)  = 0 
-          if (pos_ip1(4)/=0  ) then
+          if (pos_ip1(4)/=0) then
             call update_real_cell_list_Ewald
           end if
           accept = accept + 1

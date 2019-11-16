@@ -4,4 +4,4 @@
 6                   !ordr(2)
 6                   !ordr(3)
 1.9D0               !tol
-20000              !tau_rf
+2000                !tau_rf

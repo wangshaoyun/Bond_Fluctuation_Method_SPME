@@ -352,6 +352,51 @@ subroutine total_energy_ewald(EE)
 end subroutine total_energy_ewald
 
 
+subroutine Ewald_long(energy_long)
+  use global_variables
+  implicit none
+  real*8 :: EE0,tol1,st,fn,tau_rf1
+  real*8, intent(out) :: energy_long
+
+!   tol1 = tol
+!   tau_rf1 = tau_rf
+!   tol = 2.1
+!   tau_rf = 50                
+  !
+  !Initialize ewald parameters and array allocate.
+  call Initialize_ewald_parameters
+!   Kmax1=ceiling(Kmax1/3.)
+!   Kmax2=ceiling(Kmax2/3.)
+!   Kmax3=ceiling(Kmax3/3.)
+  !
+  !Construct the array totk_vectk(K_total,3), and allocate
+  !rho_k(K_total), delta_rhok(K_total).
+  call build_totk_vectk
+  !
+  !Construct the coefficients vector in Fourier space
+  call build_exp_ksqr
+  !
+  !
+  call pre_calculate_real_space
+  !
+  !Initialize cell list of charge
+  call Initialize_cell_list_q_Ewald
+  !
+  !Initialize real cell list
+  call Initialize_real_cell_list_Ewald
+  !
+  !Construct the structure factor rho_k
+  call build_rho_k
+  !
+  !
+  energy_long = sum( exp_ksqr * real( conjg(rho_k) * rho_k ) )/2.D0 
+
+  deallocate(rho_k)
+  deallocate(totk_vectk)
+
+end subroutine Ewald_long
+
+
 subroutine total_energy_spme(EE)
   use global_variables
   implicit none
@@ -979,7 +1024,7 @@ subroutine error_analysis_ewald(EE1)
 
   tol1 = tol
   tau_rf1 = tau_rf
-  tol = 5
+  tol = 4
   tau_rf = 50                
   !
   !Initialize ewald parameters and array allocate.
@@ -1034,7 +1079,7 @@ subroutine error_analysis_ewald(EE1)
   call cpu_time(fn)
 !   call write_energy_parameters_Ewald
 
-  rmse = abs(EE1-EE0)/EE0
+  rmse = abs(EE1-EE0)/abs(EE0)
 
 end subroutine error_analysis_ewald
 
@@ -1597,7 +1642,7 @@ subroutine SPME_Ewald(Enrg)
   real*8, dimension(Nq_net,3) :: acc_f
   integer :: i,m
   
-  deallocate(posq)
+  if (allocated(posq)) deallocate(posq)
   allocate(posq(Nq_net,4))
   m = 0
   do i = 1, NN
@@ -1609,6 +1654,7 @@ subroutine SPME_Ewald(Enrg)
   end do
 
   call cpu_time(st)
+  
   call splcof(SPx, dSPx, iqmap, ordr(1), 1)
   call splcof(SPy, dSPy, jqmap, ordr(2), 2)
   call splcof(SPz, dSPz, kqmap, ordr(3), 3)

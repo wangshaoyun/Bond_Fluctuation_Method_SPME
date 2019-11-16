@@ -79,9 +79,9 @@ implicit none
   !################running###############!
   do step=i,StepNum0+StepNum            
     call monte_carlo_move(EE, DeltaE)
-    if ( mod(step, multistep) == 0 ) then
-      call update_multistep(EE, EE2)
-    end if
+!     if ( mod(step, multistep) == 0 ) then
+!       call update_multistep(EE, EE2)
+!     end if
     if ( mod(step,DeltaStep1) == 0 ) then
       call compute_physical_quantities
       call write_physical_quantities( step )
