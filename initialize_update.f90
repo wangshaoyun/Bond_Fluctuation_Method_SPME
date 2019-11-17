@@ -107,8 +107,8 @@ subroutine uniform_star_brushes
             pos(base2+n,1:3) = pos(base2+n-1,1:3) + bond_vector(1,1:3)
             bond_numb(base2+n-l) = bond_vector(1,4)
           else
-            pos(base2+n,1:3) = pos(base2+n-1,1:3) + bond_vector(6,1:3)
-            bond_numb(base2+n-l) = bond_vector(6,4)
+            pos(base2+n,1:3) = pos(base2+n-1,1:3) + bond_vector(1,1:3)
+            bond_numb(base2+n-l) = bond_vector(1,4)
           end if
           monbd(base2+n,1) = base2 + n - l                
           monbd(base2+n,2) = base2 + n + 1 - l            
@@ -272,9 +272,6 @@ subroutine monte_carlo_move( EE, DeltaE )
         call new_position(EE,DeltaE)
         num_move = num_move + 1
       end if
-!       if ( mod(i, multistep) == 0 ) then
-!         call update_multistep(EE, EE2)
-!       end if
     end do
   call cpu_time(fn)
 
@@ -292,8 +289,6 @@ subroutine update_multistep(EE,EE2)
   call compute_Nq_net
 
   call SPME_Ewald(energy_long1)
-
-!   call Ewald_long(energy_long1)
 
   call random_number(rnd)
 

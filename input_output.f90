@@ -19,6 +19,8 @@ save
   integer, allocatable, dimension(:,:), private :: phi_ap   ! anions (p)
   integer, allocatable, dimension(:,:), private :: phi_i    ! ions(polymer)
   integer, allocatable, dimension(:,:), private :: phi_is   ! salt ions
+  integer, allocatable, dimension(:,:), private :: phi_xy   !xy的分布图
+  integer, allocatable, dimension(:,:), private :: phi_zx   !xz的分布图
 
 contains
 
@@ -299,6 +301,11 @@ subroutine data_allocate
   allocate( b12(108) )
   allocate( monbd(Npe, arm+1) )
   allocate( bond_numb(N_Bond) )
+  allocate( bond_numb0(N_Bond) )
+  allocate( phi_xy(SizeHist,SizeHist))
+  allocate( phi_zx(SizeHist,SizeHist))
+  phi_xy = 0
+  phi_zx = 0
   monbd = 0
 
   do i = 1, Lx2
@@ -519,6 +526,12 @@ subroutine continue_read_data(l)
   open(20,file='./data/pos1.txt')
     read(20,*) ((pos(i,j),j=1,4),i=1,NN)
   close(20)
+  open(199,file='./data/phi_xy.txt')
+  open(200,file='./data/phi_zx.txt')
+    read(199,*) ((phi_xy(i,j),j=1,SizeHist),i=1,SizeHist)
+    read(200,*) ((phi_zx(i,j),j=1,SizeHist),i=1,SizeHist)
+  close(199)
+  close(200)
   open(19,file='./start_time.txt')
     read(19,*) restart_or_continue
     read(19,*) l
@@ -636,6 +649,7 @@ subroutine histogram
   integer :: i, j, k
   real*8, dimension(3) :: rij
   real*8 rsqr, max_h, theta, rr
+  integer :: x, y, z
   
   !
   !star
@@ -670,6 +684,15 @@ subroutine histogram
   do i = NN - Nq_salt_ions+1, NN
     j = pos(i,3)
     phi_is(j,2) = phi_is(j,2) + 1
+  end do
+  !2d diatribution
+  do i=1,Npe
+    x=ceiling((pos(i,1)/2.)/(Lx/SizeHist))
+    y=ceiling((pos(i,2)/2.)/(Ly/SizeHist))
+    z=ceiling((pos(i,3)/2.)/(Lz/SizeHist))
+    if (x==0 .or. y==0 .or. z==0) cycle
+    phi_xy(x,y)=phi_xy(x,y)+1
+    phi_zx(x,z)=phi_zx(x,z)+1
   end do
 
 end subroutine histogram
@@ -836,6 +859,14 @@ subroutine write_hist
     end do
     340 format(9I10)
   close(34)
+  open(199,file='./data/phi_xy.txt')
+  open(200,file='./data/phi_zx.txt')
+    do i=1,SizeHist
+      write(199,'(500I10)') (phi_xy(i,j),j=1,SizeHist)
+      write(200,'(500I10)') (phi_zx(i,j),j=1,SizeHist)
+    end do
+  close(199)
+  close(200)
 
 end subroutine write_hist
 
