@@ -1,4 +1,4 @@
-![Schmetical Diagram](https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpeg "Simulation System")
+![Schmetical Diagram](https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpg "Simulation System")
 # Bond_Fluctuation_Method_SPME
 ## About this program
 1. This is a program used to simulate weak polyelectrolytes(PE) brushes with salts by Kremer's bond fluctuation method [1,4].
