@@ -1,3 +1,4 @@
+![Schmetical Diagram](https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpeg "Simulation System")
 # Bond_Fluctuation_Method_SPME
 ## About this program
 1. This is a program used to simulate weak polyelectrolytes(PE) brushes with salts by Kremer's bond fluctuation method [1,4].
@@ -23,8 +24,15 @@ ers in All Spatial Dimensions.", *Macromolecules*, **21** (9), pp. 2819-2823, 19
 1. Determine the parameters such as box size, brush chians, time step and so on.
 2. Set the parameters in energy_data.txt and system_data.txt
 3. Open terminal and enter the current file content
-4. Input `make` in terminal to compile files
-5. Then input `./main &` in terminal to execute the files.
+4. To compile the files:
+```
+$ make
+```
+  
+5. To execute the files:
+```
+$ ./main &
+```
 
 
 
