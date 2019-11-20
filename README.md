@@ -1,7 +1,6 @@
 ![Schmetical Diagram](https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpg "Simulation System")
-```
-<img src="https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpg"  alt="Schmetical Diagram" />
-```
+
+<img src="https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpg"/>
 
 # Bond_Fluctuation_Method_SPME
 
