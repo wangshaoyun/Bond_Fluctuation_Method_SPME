@@ -36,6 +36,7 @@ $ make
 $ ./main &
 ```
 
+<img src="https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpg"/>
 
 
 
