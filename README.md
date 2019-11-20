@@ -1,4 +1,4 @@
-![Schmetical Diagram](https://github.com/wangshaoyun/Bond_Fluctuation_Method_SPME/blob/master/Fig1.jpg "Simulation System")
+![Schmetical Diagram](https://raw.githubusercontent.com/Github/wangshaoyun/image/master/img1/Fig1.jpg "Simulation System")
 
 # Bond_Fluctuation_Method_SPME
 
