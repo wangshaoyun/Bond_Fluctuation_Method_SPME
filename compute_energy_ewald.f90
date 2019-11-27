@@ -306,6 +306,7 @@ subroutine total_energy_ewald(EE)
   !real space
   do i = 1, Nq
     m = charge(i)
+    if (pos(m,4)==0) cycle
     EE1 = 0
     icelx = int((pos(m,1)-1)/clx)+1
     icely = int((pos(m,2)-1)/cly)+1
@@ -403,11 +404,18 @@ subroutine total_energy_spme(EE)
   real*8, intent(out) :: EE
   real*8 :: EE1, EE2
 
+  EE1 = 0
+  EE2 = 0
+
   call real_energy_spme(EE1)
 
   call compute_Nq_net
 
-  call SPME_Ewald(EE2)
+  if (Nq_net/=0) then
+
+    call SPME_Ewald(EE2)
+
+  end if
 
   EE = EE1 + EE2
 
@@ -427,6 +435,7 @@ subroutine real_energy_spme(EE)
   !real space
   do i = 1, Nq
     m = charge(i)
+    if (pos(m,4)==0) cycle
     EE1 = 0
     icelx = int((pos(m,1)-1)/clx)+1
     icely = int((pos(m,2)-1)/cly)+1
@@ -1204,6 +1213,7 @@ subroutine pre_calculate_real_space
   end do
 
   real_ij = real_ij * lb / beta
+  real_ij(0,0,0) = 0
 
 end subroutine pre_calculate_real_space
 
@@ -1220,7 +1230,6 @@ subroutine compute_Nq_net
       Nq_net = Nq_net + 1
     end if
   end do
-
 
 end subroutine compute_Nq_net
 
@@ -1642,30 +1651,34 @@ subroutine SPME_Ewald(Enrg)
   real*8, dimension(Nq_net,3) :: acc_f
   integer :: i,m
   
-  if (allocated(posq)) deallocate(posq)
-  allocate(posq(Nq_net,4))
-  m = 0
-  do i = 1, NN
-    if (pos(i,4)/=0) then
-      m = m + 1
-      posq(m,1:3) = pos(i,1:3)/2.D0
-      posq(m,4) = pos(i,4)*1.D0
-    end if
-  end do
+  if (Nq_net/=0) then
+    if (allocated(posq)) deallocate(posq)
+    allocate(posq(Nq_net,4))
+    m = 0
+    do i = 1, NN
+      if (pos(i,4)/=0) then
+        m = m + 1
+        posq(m,1:3) = pos(i,1:3)/2.D0
+        posq(m,4) = pos(i,4)*1.D0
+      end if
+    end do
 
-  call cpu_time(st)
-  
-  call splcof(SPx, dSPx, iqmap, ordr(1), 1)
-  call splcof(SPy, dSPy, jqmap, ordr(2), 2)
-  call splcof(SPz, dSPz, kqmap, ordr(3), 3)
+    call cpu_time(st)
+    
+    call splcof(SPx, dSPx, iqmap, ordr(1), 1)
+    call splcof(SPy, dSPy, jqmap, ordr(2), 2)
+    call splcof(SPz, dSPz, kqmap, ordr(3), 3)
 
-  call MapCharges(SPx, SPy, SPz, iqmap, jqmap, kqmap)
+    call MapCharges(SPx, SPy, SPz, iqmap, jqmap, kqmap)
 
-  call pmeOrthoConvBC(Enrg)
+    call pmeOrthoConvBC(Enrg)
 
-  call cpu_time(fn)
+    call cpu_time(fn)
 
-  Enrg = Enrg * lb / beta
+    Enrg = Enrg * lb / beta
+  else
+    Enrg = 0
+  end if
 
 end subroutine SPME_Ewald
 

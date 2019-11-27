@@ -19,8 +19,8 @@ save
   integer, allocatable, dimension(:,:), private :: phi_ap   ! anions (p)
   integer, allocatable, dimension(:,:), private :: phi_i    ! ions(polymer)
   integer, allocatable, dimension(:,:), private :: phi_is   ! salt ions
-  integer, allocatable, dimension(:,:), private :: phi_xy   !xy的分布图
-  integer, allocatable, dimension(:,:), private :: phi_zx   !xz的分布图
+  integer, allocatable, dimension(:,:), private :: phi_xy   ! xy的分布图
+  integer, allocatable, dimension(:,:), private :: phi_zx   ! xz的分布图
 
 contains
 
@@ -302,8 +302,8 @@ subroutine data_allocate
   allocate( monbd(Npe, arm+1) )
   allocate( bond_numb(N_Bond) )
   allocate( bond_numb0(N_Bond) )
-  allocate( phi_xy(SizeHist,SizeHist))
-  allocate( phi_zx(SizeHist,SizeHist))
+  allocate( phi_xy(Lx2,Lx2))
+  allocate( phi_zx(Lx2,Lz2+1))
   phi_xy = 0
   phi_zx = 0
   monbd = 0
@@ -528,8 +528,8 @@ subroutine continue_read_data(l)
   close(20)
   open(199,file='./data/phi_xy.txt')
   open(200,file='./data/phi_zx.txt')
-    read(199,*) ((phi_xy(i,j),j=1,SizeHist),i=1,SizeHist)
-    read(200,*) ((phi_zx(i,j),j=1,SizeHist),i=1,SizeHist)
+    read(199,*) ((phi_xy(i,j),j=1,Lx2),i=1,Lx2)
+    read(200,*) ((phi_zx(i,j),j=1,Lz2+1),i=1,Lx2)
   close(199)
   close(200)
   open(19,file='./start_time.txt')
@@ -687,9 +687,9 @@ subroutine histogram
   end do
   !2d diatribution
   do i=1,Npe
-    x=ceiling((pos(i,1)/2.)/(Lx/SizeHist))
-    y=ceiling((pos(i,2)/2.)/(Ly/SizeHist))
-    z=ceiling((pos(i,3)/2.)/(Lz/SizeHist))
+    x=pos(i,1)
+    y=pos(i,2)
+    z=pos(i,3)
     if (x==0 .or. y==0 .or. z==0) cycle
     phi_xy(x,y)=phi_xy(x,y)+1
     phi_zx(x,z)=phi_zx(x,z)+1
@@ -861,9 +861,15 @@ subroutine write_hist
   close(34)
   open(199,file='./data/phi_xy.txt')
   open(200,file='./data/phi_zx.txt')
-    do i=1,SizeHist
-      write(199,'(500I10)') (phi_xy(i,j),j=1,SizeHist)
-      write(200,'(500I10)') (phi_zx(i,j),j=1,SizeHist)
+    do i=1,Lx2
+      do j = 1, Lx2
+        write(199,'(I10,$)') phi_xy(i,j)
+      end do
+      write(199,*)
+      do j = 1, Lz2+1
+        write(200,'(I10,$)') phi_zx(i,j)
+      end do
+      write(200,*)
     end do
   close(199)
   close(200)
@@ -895,7 +901,7 @@ subroutine write_energy(j,EE,EE1)
   real*8, intent(in) :: EE1
 
   open(36,position='append', file='./data/energy.txt')
-    write(36,361) 1.*j, EE, EE1, Nq_net*1.D0/Nq_PE*100, &
+    write(36,361) 1.*j, EE, EE1, 100-(Nq-Nq_net)/2*1.D0/Nq_PE*100, &
            NN-(Npe/man_s-Nq_net)*2.D0, accept_ratio, &
            accept_ratio_pH, accept_ratio_long, rmse*100
     361 format(9F17.5)

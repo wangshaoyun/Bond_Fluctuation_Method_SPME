@@ -193,7 +193,7 @@ subroutine initialize_ions
       call random_number(rnd)
       xi = floor(rnd(1)*Lx2) + 1
       yi = floor(rnd(2)*Ly2) + 1
-      zi = floor(rnd(3)*Lz2) + 1
+      zi = Lz2 - floor(rnd(3)*Lz2/5)
       xp = ipx(xi)
       yp = ipy(yi)
       zp = ipz(zi)
@@ -218,7 +218,7 @@ subroutine initialize_ions
       end if
     end do
     if (i<=Npe+Nq_PE*abs(qq)) then
-      pos(i,4) = - qq / abs(qq)
+      pos(i,4) = - qq !/ abs(qq)
     elseif (i>NN-Nq_salt_ions) then
       pos(i,4) = qqi
     else
@@ -260,6 +260,7 @@ subroutine monte_carlo_move( EE, DeltaE )
   call cpu_time(st)
     do i = 1, NN - Nga
       if ( mod(i,DeltaStep) == 0 .and. qq/=0 .and. pH_or_not/=0 ) then
+!       if ( mod(i,(NN - Nga)/2) == 0 .and. qq/=0 .and. pH_or_not/=0 ) then
         num_pH = num_pH + 1
         call choose_particle_pH
         if (pos(ip,4)==0) then
@@ -288,11 +289,14 @@ subroutine update_multistep(EE,EE2)
   
   call compute_Nq_net
 
-  call SPME_Ewald(energy_long1)
+  if (Nq_net /=0 ) then
+    call SPME_Ewald(energy_long1)
+  end if
 
   call random_number(rnd)
 
   DeltaE = energy_long1 - energy_long0
+!   write(*,*) DeltaE
   EE = EE + DeltaE
   num_long = num_long + 1
   total_accept = total_accept + accept
@@ -324,6 +328,16 @@ subroutine update_multistep(EE,EE2)
   accept_ratio_pH = 1.*total_accept_pH / num_pH
   accept_ratio_long = 1.*total_accept_long / num_long
 
+!   write(*,*) EE
+
+!   total_accept = 0
+!   total_accept_long = 0
+!   total_accept_pH = 0
+!   num_move = 0
+!   num_long = 0
+!   num_pH = 0
+!   write(*,*) accept_ratio,accept_ratio_long,accept_ratio_pH
+
 end subroutine update_multistep
 
 
@@ -337,7 +351,7 @@ subroutine choose_particle
 
   !
   !The monomer anchored on the plate can't move, so we need to choose again.
-  do while( mod(ip,Ns) == 1 .and. ip <= Npe )
+  do while( (mod(ip,Ns)==1 .and. ip<=Npe) .or. (ip>Npe .and. pos(ip,4)==0))
     call random_number(rnd)
     ip = int(rnd*NN) + 1
   end do
@@ -396,6 +410,7 @@ subroutine add_particle(EE,DeltaE)
           latt(xp,yi,zi)+latt(xp,yi,zp)+latt(xp,yp,zi)+latt(xp,yp,zp)
   if (total == 0) then
     call Delta_Energy_Ewald_add(DeltaE)
+!     write(*,*) DeltaE
     if ((DeltaE+U_prot)<0) then
       latt(xi,yi,zi) = 1
       latt(xi,yi,zp) = 1
@@ -409,7 +424,7 @@ subroutine add_particle(EE,DeltaE)
       pos(ip1,:) = pos_ip1i
       call update_cell_list_pH_add_Ewald
       EE = EE + DeltaE
-      accept = accept + 1
+      accept_pH = accept_pH + 1
     else
       call random_number(rnd1)
       if (rnd1<(exp(-(DeltaE+U_prot)*beta))) then
@@ -458,6 +473,7 @@ subroutine delete_particle(EE, DeltaE)
   zp = ipz(zi)
 
   call Delta_Energy_Ewald_delete(DeltaE)
+!   write(*,*) DeltaE
   if ((DeltaE-U_prot)<0) then
     latt(xi,yi,zi) = 0
     latt(xi,yi,zp) = 0
@@ -471,7 +487,7 @@ subroutine delete_particle(EE, DeltaE)
     pos(ip1,:) = pos_ip1i
     call update_cell_list_pH_delete_Ewald
     EE = EE + DeltaE
-    accept = accept + 1
+    accept_pH = accept_pH + 1
   else
     call random_number(rnd)
     if (rnd<(exp(-(DeltaE-U_prot)*beta))) then

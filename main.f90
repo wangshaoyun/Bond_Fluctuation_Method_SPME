@@ -46,14 +46,20 @@ implicit none
     call initialize_energy_arrays_ewald
     !
     !error analysis
-    call error_analysis(0,EE)
+    call compute_Nq_net
+    if (Nq_net /=0 ) then
+      call error_analysis(0,EE)
+    end if
   end if
 
-  call SPME_Ewald(energy_long0)
-  call real_energy_spme(energy_short)
+  call compute_Nq_net
+
+  if (Nq_net /=0 ) then
+    call SPME_Ewald(energy_long0)
+    call real_energy_spme(energy_short)
+  end if
 
   EE2 = EE
-
   !##############preheating##############!
   if ( i <= StepNum0 ) then
     do step=i, StepNum0
@@ -66,7 +72,10 @@ implicit none
         call write_physical_quantities( step )
       end if
       if ( mod(step,DeltaStep3) == 0 ) then
-        call error_analysis(0, EE1)
+        call compute_Nq_net
+        if (Nq_net /=0 ) then
+          call error_analysis(0,EE1)
+        end if
         call write_energy(step,EE,EE1)
         call write_pos1(step)
         EE = EE1
@@ -79,9 +88,9 @@ implicit none
   !################running###############!
   do step=i,StepNum0+StepNum            
     call monte_carlo_move(EE, DeltaE)
-!     if ( mod(step, multistep) == 0 ) then
-!       call update_multistep(EE, EE2)
-!     end if
+    if ( mod(step, multistep) == 0 ) then
+      call update_multistep(EE, EE2)
+    end if
     if ( mod(step,DeltaStep1) == 0 ) then
       call compute_physical_quantities
       call write_physical_quantities( step )
