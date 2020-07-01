@@ -17,16 +17,16 @@ initialize_update.o initialize_update.mod: compute_energy_ewald.mod \
 	
 	gfortran -g -c initialize_update.f90
 	
-# .PHONY: compute_energy_ewald.o compute_energy_ewald.mod
-compute_energy_ewald.o compute_energy_ewald.mod: global_variables.mod \
-  input_output.mod compute_energy_ewald.f90
-	
-	gfortran -g -c compute_energy_ewald.f90
-
 # .PHONY: input_output.o input_output.mod
-input_output.o input_output.mod: global_variables.mod input_output.f90
+input_output.o input_output.mod: global_variables.mod \
+  compute_energy_ewald.mod input_output.f90
 	
 	gfortran -g -c input_output.f90
+
+# .PHONY: compute_energy_ewald.o compute_energy_ewald.mod
+compute_energy_ewald.o compute_energy_ewald.mod: global_variables.mod compute_energy_ewald.f90
+	
+	gfortran -g -c compute_energy_ewald.f90
 	
 # .PHONY: global_variables.o global_variables.mod
 global_variables.o global_variables.mod: global_variables.f90

@@ -336,7 +336,7 @@ subroutine total_energy_ewald(EE)
     EE = EE + EE1*pos(m,4)/2.D0 
     !
     !external field
-    EE = EE - EF*pos(m,4)*pos(m,3)/2.D0
+    EE = EE - EF*pos(m,4)*pos(m,3)/sigma_unit
     !
     !self corrected term
     Ec = Ec - sqrt(alpha2/pi) * pos(m,4) * pos(m,4)
@@ -407,14 +407,16 @@ subroutine total_energy_spme(EE)
   EE1 = 0
   EE2 = 0
 
-  call real_energy_spme(EE1)
+  if (qq/=0) then
+    call real_energy_spme(EE1)
 
-  call compute_Nq_net
+    call compute_Nq_net
 
-  if (Nq_net/=0) then
+    if (Nq_net/=0) then
 
-    call SPME_Ewald(EE2)
+      call SPME_Ewald(EE2)
 
+    end if
   end if
 
   EE = EE1 + EE2
@@ -465,7 +467,7 @@ subroutine real_energy_spme(EE)
     EE = EE + EE1*pos(m,4)/2.D0 
     !
     !external field
-    EE = EE - EF*pos(m,4)*pos(m,3)/2.D0
+    EE = EE - EF*pos(m,4)*pos(m,3)/sigma_unit
     !
     !self corrected term
     Ec = Ec - sqrt(alpha2/pi) * pos(m,4) * pos(m,4)
@@ -652,11 +654,11 @@ subroutine Delta_real_Energy(DeltaE)
   DeltaE = DeltaE + EE2 - EE1
   !
   !Change of correction energy in slab geometry
-  dMz = pos_ip0(4) * (pos_ip1(3) - pos_ip0(3))/2.D0
+  dMz = pos_ip0(4) * (pos_ip1(3) - pos_ip0(3))/sigma_unit
   DeltaE = DeltaE + Mz_coef * (2*Mz*dMz + dMz*dMz)
   !
   ! External field energy
-  DeltaE=DeltaE-EF*pos_ip0(4)*(pos_ip1(3)-pos_ip0(3))/2.D0   !simga unit
+  DeltaE=DeltaE-EF*pos_ip0(4)*(pos_ip1(3)-pos_ip0(3))/sigma_unit   !simga unit
 
 end subroutine Delta_real_Energy
 
@@ -738,11 +740,12 @@ subroutine Delta_real_Energy_add(DeltaE)
   end if
   !
   !modified term of slab geometry
-  dMz = pos_ip1i(4)*pos_ip1i(3)/2.D0 + pos_ip1(4)*pos_ip1(3)/2.D0
+  dMz = pos_ip1i(4)*pos_ip1i(3)/sigma_unit + pos_ip1(4)*pos_ip1(3)/sigma_unit
   DeltaE = DeltaE + Mz_coef * (2*Mz*dMz + dMz*dMz)
   !
   !External field energy
-  DeltaE=DeltaE-EF*pos_ip1i(4)*pos_ip1i(3)/2.D0-EF*pos_ip1(4)*pos_ip1(3)/2.D0
+  DeltaE=DeltaE-EF*pos_ip1i(4)*pos_ip1i(3)/sigma_unit & 
+         -EF*pos_ip1(4)*pos_ip1(3)/sigma_unit
   !
   !
   DeltaE = DeltaE - sqrt(alpha2/pi)*(qq1**2+qq2**2)*lb/beta
@@ -832,11 +835,12 @@ subroutine Delta_real_Energy_delete(DeltaE)
   end if 
   !
   !modified term of slab geometry
-  dMz = - pos_ip0i(4)*pos_ip0i(3)/2.D0 - pos_ip0(4)*pos_ip0(3)/2.D0
+  dMz = - pos_ip0i(4)*pos_ip0i(3)/sigma_unit - pos_ip0(4)*pos_ip0(3)/sigma_unit
   DeltaE = DeltaE + Mz_coef * (2*Mz*dMz + dMz*dMz)
   !
   !External field energy
-  DeltaE=DeltaE+EF*pos_ip0i(4)*pos_ip0i(3)/2.D0+EF*pos_ip0(4)*pos_ip0(3)/2.D0
+  DeltaE=DeltaE+EF*pos_ip0i(4)*pos_ip0i(3)/sigma_unit &
+         +EF*pos_ip0(4)*pos_ip0(3)/sigma_unit
 
   DeltaE = DeltaE + sqrt(alpha2/pi)*(qq1*qq1+qq2*qq2)*lb/beta
 
@@ -1203,9 +1207,9 @@ subroutine pre_calculate_real_space
   do i = 0, nnl
     do j = 0, nnl
       do k = 0, nnl
-        x = i/2.D0                      !sigma unit
-        y = j/2.D0
-        z = k/2.D0
+        x = i/sigma_unit                      !sigma unit
+        y = j/sigma_unit
+        z = k/sigma_unit
         rr = sqrt(x*x+y*y+z*z)
         real_ij(i,j,k) = erfc(alpha*rr)/rr
       end do
@@ -1336,7 +1340,7 @@ subroutine Initialize_real_cell_list_Ewald
 
   Mz = 0
   do i = 1, NN
-    Mz = Mz + pos(i,4)*pos(i,3)/2.D0 !sigma unit
+    Mz = Mz + pos(i,4)*pos(i,3)/sigma_unit !sigma unit
   end do
 
   do i = 1, Nq
@@ -1582,10 +1586,12 @@ subroutine build_rho_k
     eiky(m,0)  = (1,0)
     eikz(m,0)  = (1,0)
 
-    eikx(m,1)  = cmplx( cos(c1*pos(i,1)/2.D0), sin(c1*pos(i,1)/2.D0), 8 )
-    eiky(m,1)  = cmplx( cos(c2*pos(i,2)/2.D0), sin(c2*pos(i,2)/2.D0), 8 )
-    eikz(m,1)  = cmplx( cos(c3*pos(i,3)/2.D0), sin(c3*pos(i,3)/2.D0), 8 )
-
+    eikx(m,1)  = cmplx( cos(c1*pos(i,1)/sigma_unit), &
+                 sin(c1*pos(i,1)/sigma_unit), 8 )
+    eiky(m,1)  = cmplx( cos(c2*pos(i,2)/sigma_unit), &
+                 sin(c2*pos(i,2)/sigma_unit), 8 )
+    eikz(m,1)  = cmplx( cos(c3*pos(i,3)/sigma_unit), &
+                 sin(c3*pos(i,3)/sigma_unit), 8 )
     eikx(m,-1) = conjg(eikx(m,1))
     eiky(m,-1) = conjg(eiky(m,1))
     m = cell_list_q(m)
@@ -1650,15 +1656,15 @@ subroutine SPME_Ewald(Enrg)
   real*8 :: st,fn,tm
   real*8, dimension(Nq_net,3) :: acc_f
   integer :: i,m
-  
-  if (Nq_net/=0) then
+
+  if (Nq_net/=0 .and. qq/=0) then
     if (allocated(posq)) deallocate(posq)
     allocate(posq(Nq_net,4))
     m = 0
     do i = 1, NN
       if (pos(i,4)/=0) then
         m = m + 1
-        posq(m,1:3) = pos(i,1:3)/2.D0
+        posq(m,1:3) = pos(i,1:3)/sigma_unit
         posq(m,4) = pos(i,4)*1.D0
       end if
     end do

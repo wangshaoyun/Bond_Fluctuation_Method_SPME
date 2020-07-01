@@ -48,3 +48,5 @@ start_time.txt
 data/energy.txt
 data/height.txt
 energy_data.txt
+data/phi_xy.txt
+data/phi_zx.txt

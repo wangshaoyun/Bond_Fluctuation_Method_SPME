@@ -17,4 +17,4 @@
 500             ! DeltaStep1: height
 500             ! DeltaStep2: histogram
 500             ! DeltaStep3: write data
-0               ! pH-pKa
+0.1             ! pH-pKa
