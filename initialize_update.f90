@@ -410,12 +410,12 @@ subroutine add_particle(EE,DeltaE)
           latt(xp,yi,zi)+latt(xp,yi,zp)+latt(xp,yp,zi)+latt(xp,yp,zp)
   if (total == 0) then
     call Delta_Energy_Ewald_add(DeltaE)
-    if (Nq_net/=0) then
-      Delta_Prob = 1. * ( Nq_PE - Nq_net ) / Nq_net * exp(-(DeltaE-U_prot)*beta)
-    else
-      Delta_Prob = 1
-    end if
-!     write(*,*) DeltaE
+!     if (Nq_net_pe/=0) then
+!       Delta_Prob = 1. * ( Nq_PE - Nq_net_pe ) / Nq_net_pe * exp(-(DeltaE-U_prot)*beta)
+!     else
+!       Delta_Prob = 1
+!     end if
+    Delta_Prob = exp(-(DeltaE-U_prot)*beta)
     if (Delta_Prob>=1) then
       latt(xi,yi,zi) = 1
       latt(xi,yi,zp) = 1
@@ -478,12 +478,12 @@ subroutine delete_particle(EE, DeltaE)
   zp = ipz(zi)
 
   call Delta_Energy_Ewald_delete(DeltaE)
-  if ((Nq_PE - Nq_net)/=0) then
-    Delta_Prob = 1. * Nq_net / ( Nq_PE - Nq_net ) * exp(-(DeltaE+U_prot)*beta)
-  else
-    Delta_Prob = 1
-  end if
-!   write(*,*) DeltaE
+!   if ((Nq_PE - Nq_net_pe)/=0) then
+!     Delta_Prob = 1. * Nq_net_pe / ( Nq_PE - Nq_net_pe ) * exp(-(DeltaE+U_prot)*beta)
+!   else
+!     Delta_Prob = 1
+!   end if
+  Delta_Prob = exp(-(DeltaE+U_prot)*beta)
   if (Delta_Prob>=1) then
     latt(xi,yi,zi) = 0
     latt(xi,yi,zp) = 0

@@ -16,6 +16,7 @@ save
   integer :: Nq       !Total charge in the system, ions + aions
   integer :: Nq_PE    !Charged monomers of PE
   integer :: Nq_net   !Net charged monomers of PE, or protonated monomers
+  integer :: Nq_net_pe!Net charged monomers of PE, or protonated monomers
   integer :: NN       !Total particles in the system
   integer :: NN_net   !Net particles in system
   integer :: Nq_salt_ions !Charged salt ions, which not include anions.

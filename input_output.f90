@@ -161,6 +161,7 @@ subroutine data_operation
   Nq = Nq_PE * ( abs(qq)+1 ) + Nq_salt_ions * ( abs(qqi) + 1 )
   NN = Npe + Nq_PE * abs(qq) + Nq_salt_ions * ( abs(qqi) + 1 )
   Nq_net = Nq
+  Nq_net_pe = Nq_PE
   !
   !System size, keep mod(Lx,nx)=0
   Lx2 = nint(sqrt( Nga / sigmag ) * sigma_unit)  
@@ -543,6 +544,7 @@ subroutine continue_read_data(l)
     read(19,*) restart_or_continue
     read(19,*) l
     read(19,*) Nq_net
+    read(19,*) Nq_net_pe
     read(19,*) total_time
   close(19)
   open(22,file='./data/phi.txt')
@@ -835,6 +837,7 @@ subroutine write_pos1(l)
     write(109,*) 1
     write(109,*) l
     write(109,*) Nq_net
+    write(109,*) Nq_net_pe
     call cpu_time(finished)
     total_time=total_time+finished-started
     call cpu_time(started)
@@ -957,10 +960,10 @@ subroutine write_energy(j,EE,EE1)
   real*8, intent(in) :: EE1
 
   open(36,position='append', file='./data/energy.txt')
-    write(36,361) 1.*j, EE, EE1, 100-(Nq-Nq_net)/2*1.D0/Nq_PE*100, &
-           NN-(Npe/man_s-Nq_net)*2.D0, accept_ratio, &
-           accept_ratio_pH, accept_ratio_long, rmse*100
-    361 format(9F17.5)
+    write(36,361) 1.*j, EE, EE1, Nq_net_pe*1.D0/Nq_PE*100, &
+           NN-Npe-(Nq_pe-Nq_net_pe)*2., accept_ratio, &
+           accept_ratio_pH, accept_ratio_long, rmse*100, Nq_net*1., Nq_net_pe*1.
+    361 format(11F17.5)
   close(36)  
 
 end subroutine write_energy

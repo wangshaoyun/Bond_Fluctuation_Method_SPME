@@ -884,7 +884,8 @@ subroutine update_cell_list_pH_add_Ewald
   call update_real_cell_list_add_Ewald(ip1,icelx,icely,icelz)
   call update_charge_cell_list_add_Ewald(ip1)
 
-  Nq_net = Nq_net + 1
+  Nq_net = Nq_net + 2
+  Nq_net_pe = Nq_net_pe + 1
 
   Mz = Mz + dMz
 
@@ -908,7 +909,8 @@ subroutine update_cell_list_pH_delete_Ewald
   call update_real_cell_list_delete_Ewald(ip1,icelx,icely,icelz)
   call update_charge_cell_list_delete_Ewald(ip1)
 
-  Nq_net = Nq_net - 1
+  Nq_net = Nq_net - 2
+  Nq_net_pe = Nq_net_pe - 1
 
   Mz = Mz + dMz
 
@@ -1228,10 +1230,14 @@ subroutine compute_Nq_net
   integer :: i
 
   Nq_net = 0
+  Nq_net_pe = 0
 
   do i = 1, NN
     if(pos(i,4)/=0) then
       Nq_net = Nq_net + 1
+      if(i<=Npe) then
+        Nq_net_pe = Nq_net_pe + 1
+      end if 
     end if
   end do
 
